@@ -7,7 +7,8 @@ import PageHeader from '../components/PageHeader';
 const statusConfig = {
   Selesai: { bg: 'bg-green-50', text: 'text-green-700', dot: 'bg-green-500' },
   Menunggu: { bg: 'bg-yellow-50', text: 'text-yellow-700', dot: 'bg-yellow-500' },
-  Proses: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
+  // Mengubah Proses dari blue ke sky
+  Proses: { bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500' },
   Batal: { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
 };
 
@@ -43,7 +44,8 @@ export default function Customers() {
         title="Data Pasien"
         subtitle={`${customers.length} total pasien terdaftar`}
         action={
-          <button className="btn-primary">
+          /* Pastikan btn-primary di CSS Anda sudah menggunakan bg-sky-500 */
+          <button className="btn-primary flex items-center gap-2">
             <Plus size={15} /> Tambah Pasien
           </button>
         }
@@ -59,7 +61,7 @@ export default function Customers() {
                 onClick={() => setActiveFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   activeFilter === f
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-sky-500 text-white' // Diubah dari blue-600
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -74,7 +76,7 @@ export default function Customers() {
               placeholder="Cari nama, email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-9 py-2 text-xs"
+              className="input-field pl-9 py-2 text-xs focus:border-sky-500 focus:ring-sky-500"
             />
           </div>
         </div>
@@ -106,7 +108,8 @@ export default function Customers() {
                   <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="py-3.5 px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {/* Gradient Avatar diubah ke sky */}
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                           {c.avatar}
                         </div>
                         <div>
@@ -138,7 +141,7 @@ export default function Customers() {
                     <td className="py-3.5 px-4">
                       <button
                         onClick={() => navigate(`/customers/${c.id}`)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors"
                       >
                         <Eye size={12} /> Detail
                       </button>

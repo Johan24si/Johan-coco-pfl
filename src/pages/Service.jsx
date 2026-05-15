@@ -12,9 +12,9 @@ const services = [
     description: 'Pembersihan karang gigi dan plak secara menyeluruh untuk menjaga kesehatan gigi dan gusi.',
     popular: true,
     icon: Sparkles,
-    color: 'bg-blue-500',
-    lightColor: 'bg-blue-50',
-    textColor: 'text-blue-600',
+    color: 'bg-sky-500', // Diubah ke sky
+    lightColor: 'bg-sky-50', // Diubah ke sky
+    textColor: 'text-sky-600', // Diubah ke sky
   },
   {
     id: 2,
@@ -131,7 +131,7 @@ export default function Service() {
         title="Layanan Klinik"
         subtitle={`${services.length} layanan tersedia`}
         action={
-          <button className="btn-primary">
+          <button className="btn-primary flex items-center gap-2">
             <Plus size={15} /> Tambah Layanan
           </button>
         }
@@ -146,7 +146,7 @@ export default function Service() {
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  activeCategory === cat ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  activeCategory === cat ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 {cat}
@@ -160,7 +160,7 @@ export default function Service() {
               placeholder="Cari layanan..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-9 py-2 text-xs"
+              className="input-field pl-9 py-2 text-xs focus:border-sky-500 focus:ring-sky-500"
             />
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function Service() {
                   )}
                 </div>
               </div>
-              <h3 className="text-sm font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-sm font-bold text-gray-900 mb-1 group-hover:text-sky-600 transition-colors">
                 {service.name}
               </h3>
               <p className="text-xs text-gray-500 leading-relaxed mb-4 line-clamp-2">{service.description}</p>
@@ -200,7 +200,8 @@ export default function Service() {
                     <Tag size={11} /> {service.category}
                   </span>
                 </div>
-                <p className="text-sm font-bold text-blue-600">{formatPrice(service.price)}</p>
+                {/* Teks Harga diubah ke sky-600 */}
+                <p className="text-sm font-bold text-sky-600">{formatPrice(service.price)}</p>
               </div>
             </div>
           );

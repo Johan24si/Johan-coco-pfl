@@ -53,7 +53,7 @@ export default function Register() {
                 placeholder={placeholder}
                 value={form[key]}
                 onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                className="input-field pl-10"
+                className="input-field pl-10 focus:border-sky-500 focus:ring-sky-500" // Tambah fokus warna sky
               />
             </div>
           </div>
@@ -68,7 +68,7 @@ export default function Register() {
               placeholder="Min. 8 karakter"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="input-field pl-10 pr-10"
+              className="input-field pl-10 pr-10 focus:border-sky-500 focus:ring-sky-500"
             />
             <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
               {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -85,7 +85,7 @@ export default function Register() {
               placeholder="Ulangi kata sandi"
               value={form.confirm}
               onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-              className="input-field pl-10"
+              className="input-field pl-10 focus:border-sky-500 focus:ring-sky-500"
             />
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function Register() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+          className="w-full py-2.5 bg-sky-500 text-white text-sm font-semibold rounded-xl hover:bg-sky-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
         >
           {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Mendaftar...</> : 'Buat Akun'}
         </button>
@@ -101,7 +101,7 @@ export default function Register() {
 
       <p className="text-center text-sm text-gray-500 mt-6">
         Sudah punya akun?{' '}
-        <Link to="/login" className="text-blue-600 font-semibold hover:text-blue-700">Masuk di sini</Link>
+        <Link to="/login" className="text-sky-500 font-semibold hover:text-sky-600">Masuk di sini</Link>
       </p>
     </div>
   );
