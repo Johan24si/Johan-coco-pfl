@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Wrench,
-  LogOut, Stethoscope, ChevronRight,
+  LogOut, Stethoscope, ChevronRight, Layers,
 } from 'lucide-react';
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { path: '/customers', icon: Users, label: 'Pasien' },
   { path: '/orders', icon: Calendar, label: 'Jadwal' },
   { path: '/service', icon: Wrench, label: 'Layanan' },
+  { path: '/components', icon: Layers, label: 'Components' },
 ];
 
 export default function Sidebar() {
