@@ -18,6 +18,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const statusConfig = {
   Selesai: { bg: 'bg-green-50', text: 'text-green-700', dot: 'bg-green-500' },
@@ -43,6 +53,7 @@ export default function Customers() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('Semua');
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const filtered = customers.filter((c) => {
     const matchSearch =
@@ -180,7 +191,7 @@ export default function Customers() {
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem variant="destructive" onClick={() => {}}>
+                      <DropdownMenuItem variant="destructive" onClick={() => setDeleteTarget(c)}>
                         <Trash2 size={14} />
                         <span>Hapus Pasien</span>
                       </DropdownMenuItem>
@@ -195,6 +206,24 @@ export default function Customers() {
           <p className="text-xs text-gray-400">Menampilkan {filtered.length} dari {customers.length} pasien</p>
         </div>
       </Card>
+
+      {/* ✅ Shadcn UI AlertDialog — konfirmasi hapus pasien */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Data Pasien?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Anda yakin ingin menghapus data <strong className="text-gray-700">{deleteTarget?.name}</strong>? Tindakan ini tidak dapat dibatalkan dan semua riwayat kunjungan pasien akan ikut terhapus.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setDeleteTarget(null)}>
+              Ya, Hapus Pasien
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
