@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Stethoscope } from 'lucide-react';
+import Card from '../../components/Card';
+import Button from '../../components/Button';
+import InputField from '../../components/InputField';
+import Alert from '../../components/Alert';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -35,31 +39,27 @@ export default function Login() {
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Portal Dokter</h1>
       <p className="text-sm text-gray-500 mb-7">Masuk untuk mengakses dashboard Anda</p>
 
-      {/* ── Card Form ── */}
-      <div className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
+      {/* ── Card Form (menggunakan Card component) ── */}
+      <Card className="w-full !p-7">
 
-        {/* Pesan error */}
+        {/* Pesan error (menggunakan Alert component) */}
         {error && (
-          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-lg">
+          <Alert type="danger" className="mb-4">
             {error}
-          </div>
+          </Alert>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
-          {/* Email */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">Alamat Email</label>
-            <input
-              type="email"
-              placeholder="doctor@example.com"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg outline-none
-                         focus:border-[#22a1c4] focus:ring-2 focus:ring-[#22a1c4]/10 transition
-                         placeholder:text-gray-400"
-            />
-          </div>
+          {/* Email (menggunakan InputField component) */}
+          <InputField
+            label="Alamat Email"
+            type="email"
+            placeholder="doctor@example.com"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="[&_input]:focus:border-[#22a1c4] [&_input]:focus:ring-[#22a1c4]/10"
+          />
 
           {/* Kata Sandi */}
           <div className="flex flex-col gap-1.5">
@@ -104,13 +104,12 @@ export default function Login() {
             </Link>
           </div>
 
-          {/* Tombol Masuk: Menggunakan Warna Custom */}
-          <button
-            type="submit"
+          {/* Tombol Masuk (menggunakan Button component) */}
+          <Button
+            type="primary"
+            className="w-full !py-2.5 !bg-[#22a1c4] hover:!bg-[#1e8da1] active:!bg-[#1a7d99] disabled:!opacity-60 !font-semibold !rounded-lg justify-center shadow-md shadow-[#22a1c4]/20"
             disabled={loading}
-            className="w-full py-2.5 bg-[#22a1c4] hover:bg-[#1e8da1] active:bg-[#1a7d99]
-                       disabled:opacity-60 text-white text-sm font-semibold rounded-lg
-                       flex items-center justify-center gap-2 transition-all shadow-md shadow-[#22a1c4]/20"
+            onClick={handleSubmit}
           >
             {loading ? (
               <>
@@ -118,7 +117,7 @@ export default function Login() {
                 Memuat...
               </>
             ) : 'Masuk'}
-          </button>
+          </Button>
         </form>
 
         {/* Bantuan */}
@@ -128,7 +127,7 @@ export default function Login() {
             Hubungi dukungan
           </Link>
         </p>
-      </div>
+      </Card>
 
     </div>
   );

@@ -9,7 +9,6 @@ const navItems = [
   { path: '/customers', icon: Users, label: 'Pasien' },
   { path: '/orders', icon: Calendar, label: 'Jadwal' },
   { path: '/service', icon: Wrench, label: 'Layanan' },
-  { path: '/components', icon: Layers, label: 'Components' },
 ];
 
 export default function Sidebar() {

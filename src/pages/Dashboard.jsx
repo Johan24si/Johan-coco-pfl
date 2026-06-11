@@ -1,10 +1,15 @@
-import { Users, Calendar, Clock, DollarSign, TrendingUp, ArrowRight, ShieldCheck, FileText, CreditCard, CalendarPlus, UserPlus } from 'lucide-react';
+import { Users, Calendar, Clock, DollarSign, TrendingUp, ArrowRight, ShieldCheck, FileText, CreditCard, CalendarPlus, UserPlus, Info } from 'lucide-react';
 import { customers } from '../data/customers';
 import { orders } from '../data/orders';
 import PageHeader from '../components/PageHeader';
+import Card from '../components/Card';
+import Badge from '../components/Badge';
+import Button from '../components/Button';
+import Avatar from '../components/Avatar';
 import { useNavigate } from 'react-router-dom';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-// ── Konfigurasi badge status ──────────────────────────────────────────────────
+// ── Konfigurasi badge status ────c──────────────────────────────────────────────
 const STATUS = {
   Selesai:  { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-400' },
   Menunggu: { bg: 'bg-amber-50',   text: 'text-amber-700',   dot: 'bg-amber-400'   },
@@ -13,6 +18,17 @@ const STATUS = {
   Tiba:     { bg: 'bg-teal-50',    text: 'text-teal-700',    dot: 'bg-teal-400'    },
   'Dalam Penanganan': { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-400' },
   Terjadwal:{ bg: 'bg-gray-100',   text: 'text-gray-500',    dot: 'bg-gray-400'    },
+};
+
+// Map status ke Badge type
+const STATUS_BADGE_TYPE = {
+  Selesai: 'success',
+  Menunggu: 'warning',
+  Proses: 'primary',
+  Batal: 'danger',
+  Tiba: 'success',
+  'Dalam Penanganan': 'primary',
+  Terjadwal: 'secondary',
 };
 
 function BadgeStatus({ status }) {
@@ -27,10 +43,10 @@ function BadgeStatus({ status }) {
 
 // ── Aksi cepat ───────────────────────────────────────────────────────────────
 const AKSI_CEPAT = [
-  { label: 'Verifikasi Asuransi',    Icon: ShieldCheck,  path: '/asuransi'    },
-  { label: 'Kirim Formulir via SMS', Icon: FileText,     path: '/formulir'    },
-  { label: 'Proses Pembayaran',      Icon: CreditCard,   path: '/pembayaran'  },
-  { label: 'Buat Jadwal Baru',       Icon: CalendarPlus, path: '/orders/baru' },
+  { label: 'Verifikasi Asuransi',    Icon: ShieldCheck,  path: '/asuransi',    tooltip: 'Cek dan verifikasi polis asuransi pasien' },
+  { label: 'Kirim Formulir via SMS', Icon: FileText,     path: '/formulir',    tooltip: 'Kirim formulir pendaftaran ke HP pasien' },
+  { label: 'Proses Pembayaran',      Icon: CreditCard,   path: '/pembayaran',  tooltip: 'Buka halaman kasir untuk pembayaran' },
+  { label: 'Buat Jadwal Baru',       Icon: CalendarPlus, path: '/orders/baru', tooltip: 'Tambahkan jadwal kunjungan baru' },
 ];
 
 // ── Komponen utama ────────────────────────────────────────────────────────────
@@ -57,6 +73,7 @@ export default function Dashboard() {
       ikonBg: 'bg-cyan-50',
       ikonWarna: 'text-cyan-600',
       Ikon: Calendar,
+      tooltip: 'Total jadwal kunjungan yang aktif (tidak termasuk batal)',
     },
     {
       label: 'Selesai Hari Ini',
@@ -67,6 +84,7 @@ export default function Dashboard() {
       ikonBg: 'bg-emerald-50',
       ikonWarna: 'text-emerald-600',
       Ikon: Users,
+      tooltip: 'Jumlah pasien yang sudah selesai ditangani hari ini',
     },
     {
       label: 'Pendapatan Hari Ini',
@@ -78,6 +96,7 @@ export default function Dashboard() {
       ikonBg: 'bg-green-50',
       ikonWarna: 'text-green-600',
       Ikon: DollarSign,
+      tooltip: 'Total pendapatan dari seluruh layanan hari ini',
     },
     {
       label: 'Pasien Menunggu',
@@ -88,6 +107,7 @@ export default function Dashboard() {
       ikonBg: 'bg-amber-50',
       ikonWarna: 'text-amber-600',
       Ikon: Clock,
+      tooltip: 'Pasien yang sedang menunggu giliran di ruang tunggu',
     },
   ];
 
@@ -100,41 +120,51 @@ export default function Dashboard() {
         subtitle="Selamat datang kembali, Dr. Andi Susanto 👋"
       />
 
-      {/* ── Kartu Statistik ── */}
+      {/* ── Kartu Statistik dengan Tooltip (Shadcn UI) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
-        {kartuStat.map(({ label, nilai, sub, subIkon, subWarna, aksen, ikonBg, ikonWarna, Ikon }) => (
-          <div key={label} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        {kartuStat.map(({ label, nilai, sub, subIkon, subWarna, aksen, ikonBg, ikonWarna, Ikon, tooltip }) => (
+          <Card key={label} noPadding className="overflow-hidden">
             <div className={`h-1 w-full ${aksen}`} />
             <div className="p-4">
-              <div className={`w-9 h-9 ${ikonBg} rounded-lg flex items-center justify-center mb-3`}>
-                <Ikon size={17} className={ikonWarna} />
+              <div className="flex items-start justify-between mb-3">
+                <div className={`w-9 h-9 ${ikonBg} rounded-lg flex items-center justify-center`}>
+                  <Ikon size={17} className={ikonWarna} />
+                </div>
+                {/* ✅ Shadcn UI Tooltip pada ikon info di kartu statistik */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="text-gray-300 hover:text-gray-500 transition-colors">
+                      <Info size={14} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <p className="text-2xl font-semibold text-gray-900 leading-none">{nilai}</p>
               <p className="text-xs text-gray-400 mt-1">{label}</p>
-              <span className={`inline-flex items-center gap-1 text-[11px] font-medium mt-2 px-2 py-0.5 rounded-full ${subWarna}`}>
+              <Badge type={subWarna.includes('emerald') ? 'success' : subWarna.includes('amber') ? 'warning' : 'primary'} className="!text-[11px] !px-2 !py-0.5 mt-2">
                 {subIkon}{sub}
-              </span>
+              </Badge>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
       {/* ── Grid Bawah ── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
-        {/* Jadwal Hari Ini */}
-        <div className="xl:col-span-2 bg-white rounded-xl border border-gray-100 overflow-hidden">
+        {/* Jadwal Hari Ini (menggunakan Card component) */}
+        <Card noPadding className="xl:col-span-2 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-50">
             <div className="flex items-center gap-2">
               <span className="w-0.5 h-4 bg-cyan-500 rounded-full" />
               <h2 className="text-sm font-semibold text-gray-800">Jadwal Hari Ini</h2>
             </div>
-            <button
-              onClick={() => navigate('/orders')}
-              className="text-xs text-cyan-600 font-medium hover:text-cyan-700 flex items-center gap-1"
-            >
+            <Button type="primary" className="!bg-transparent !text-cyan-600 !px-0 !py-0 !text-xs font-medium hover:!text-cyan-700" onClick={() => navigate('/orders')}>
               Lihat semua <ArrowRight size={12} />
-            </button>
+            </Button>
           </div>
 
           <div className="divide-y divide-gray-50">
@@ -143,10 +173,8 @@ export default function Dashboard() {
                 key={order.id}
                 className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50/60 transition-colors"
               >
-                {/* Avatar */}
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white text-[11px] font-semibold flex-shrink-0">
-                  {order.avatar}
-                </div>
+                {/* Avatar (menggunakan Avatar component) */}
+                <Avatar name={order.patientName} className="!w-9 !h-9 !bg-gradient-to-br !from-cyan-400 !to-cyan-600 !text-white !text-[11px]" />
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
@@ -159,48 +187,60 @@ export default function Dashboard() {
                 {/* Status + Tombol Lihat */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <BadgeStatus status={order.status} />
-                  <button
-                    onClick={() => navigate(`/orders/${order.id}`)}
-                    className="text-xs px-3 py-1 border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 transition-colors"
-                  >
+                  <Button type="secondary" className="!text-xs !px-3 !py-1 !border-gray-200 !text-gray-500" onClick={() => navigate(`/orders/${order.id}`)}>
                     Lihat
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
-        {/* Aksi Cepat */}
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        {/* Aksi Cepat dengan Tooltip (Shadcn UI) */}
+        <Card noPadding className="overflow-hidden">
           <div className="flex items-center gap-2 px-5 py-3.5 border-b border-gray-50">
             <span className="w-0.5 h-4 bg-cyan-500 rounded-full" />
             <h2 className="text-sm font-semibold text-gray-800">Aksi Cepat</h2>
           </div>
 
           <div className="p-3 flex flex-col gap-2">
-            {/* Tombol utama */}
-            <button
-              onClick={() => navigate('/customers/baru')}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              <UserPlus size={16} />
-              Tambah Pasien Walk-In
-            </button>
+            {/* Tombol utama dengan Tooltip */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button type="primary" className="w-full !bg-cyan-500 hover:!bg-cyan-600 active:!bg-cyan-700 !px-4 !py-3 !rounded-lg justify-start" onClick={() => navigate('/customers/baru')}>
+                    <UserPlus size={16} />
+                    Tambah Pasien Walk-In
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                <p>Daftarkan pasien baru tanpa reservasi</p>
+              </TooltipContent>
+            </Tooltip>
 
-            {/* Aksi sekunder */}
-            {AKSI_CEPAT.map(({ label, Icon, path }) => (
-              <button
-                key={label}
-                onClick={() => navigate(path)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100"
-              >
-                <Icon size={16} className="text-cyan-500 flex-shrink-0" />
-                {label}
-              </button>
+            {/* ✅ Aksi sekunder dengan Shadcn UI Tooltip */}
+            {AKSI_CEPAT.map(({ label, Icon, path, tooltip }) => (
+              <Tooltip key={label}>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Button
+                      type="secondary"
+                      className="w-full !px-4 !py-2.5 !text-sm !text-gray-700 !bg-transparent !border-transparent hover:!bg-gray-50 hover:!border-gray-100 !rounded-lg justify-start"
+                      onClick={() => navigate(path)}
+                    >
+                      <Icon size={16} className="text-cyan-500 flex-shrink-0" />
+                      {label}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>{tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
             ))}
           </div>
-        </div>
+        </Card>
 
       </div>
     </div>

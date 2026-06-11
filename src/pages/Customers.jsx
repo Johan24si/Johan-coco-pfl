@@ -1,8 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Eye, Phone, Mail, Filter, CheckCircle, Clock, Activity, XCircle } from 'lucide-react';
+import { Search, Plus, Eye, Phone, Mail, Filter, CheckCircle, Clock, Activity, XCircle, MoreHorizontal, Edit2, Trash2, Calendar, FileText, Copy } from 'lucide-react';
 import { customers } from '../data/customers';
 import PageHeader from '../components/PageHeader';
+import Card from '../components/Card';
+import Badge from '../components/Badge';
+import Button from '../components/Button';
+import Avatar from '../components/Avatar';
+import Table from '../components/Table';
+import InputField from '../components/InputField';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const statusConfig = {
   Selesai: { bg: 'bg-green-50', text: 'text-green-700', dot: 'bg-green-500' },
@@ -44,118 +59,142 @@ export default function Customers() {
         title="Data Pasien"
         subtitle={`${customers.length} total pasien terdaftar`}
         action={
-          /* Pastikan btn-primary di CSS Anda sudah menggunakan bg-sky-500 */
-          <button className="btn-primary flex items-center gap-2">
+          /* Menggunakan Button component */
+          <Button type="primary" className="flex items-center gap-2">
             <Plus size={15} /> Tambah Pasien
-          </button>
+          </Button>
         }
       />
 
-      {/* Filters + Search */}
-      <div className="card p-4 mb-5">
+      {/* Filters + Search (menggunakan Card & Button component) */}
+      <Card className="!p-4 mb-5">
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div className="flex gap-2 flex-wrap">
             {FILTERS.map((f) => (
-              <button
+              <Button
                 key={f}
-                onClick={() => setActiveFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                type={activeFilter === f ? 'primary' : 'secondary'}
+                className={`!px-3 !py-1.5 !rounded-lg !text-xs !font-medium ${
                   activeFilter === f
-                    ? 'bg-sky-500 text-white' // Diubah dari blue-600
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? '!bg-sky-500 !text-white'
+                    : '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 !border-transparent'
                 }`}
+                onClick={() => setActiveFilter(f)}
               >
                 {f}
-              </button>
+              </Button>
             ))}
           </div>
           <div className="relative w-full sm:w-64">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" />
+            <InputField
               type="text"
               placeholder="Cari nama, email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-9 py-2 text-xs focus:border-sky-500 focus:ring-sky-500"
+              className="[&_input]:pl-9 [&_input]:py-2 [&_input]:text-xs [&_input]:focus:border-sky-500 [&_input]:focus:ring-sky-500"
             />
           </div>
         </div>
-      </div>
+      </Card>
 
-      {/* Table */}
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="text-left py-3.5 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wide">Pasien</th>
-                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Kontak</th>
-                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell">Kunjungan Terakhir</th>
-                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Perawatan</th>
-                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-400 text-sm">
-                    Tidak ada pasien ditemukan
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="py-3.5 px-6">
-                      <div className="flex items-center gap-3">
-                        {/* Gradient Avatar diubah ke sky */}
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          {c.avatar}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-800 text-sm">{c.name}</p>
-                          <p className="text-xs text-gray-400">{c.gender} · {c.age} tahun</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 hidden md:table-cell">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                          <Mail size={11} className="text-gray-400" />{c.email}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                          <Phone size={11} className="text-gray-300" />{c.phone}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 hidden lg:table-cell">
-                      <p className="text-sm text-gray-700">{c.lastVisit}</p>
-                      <p className="text-xs text-gray-400">{c.totalVisits}x kunjungan</p>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <p className="text-sm text-gray-700 font-medium">{c.treatment}</p>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <StatusBadge status={c.status} />
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <button
-                        onClick={() => navigate(`/customers/${c.id}`)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors"
-                      >
-                        <Eye size={12} /> Detail
+      {/* Table (menggunakan Card & Table component) */}
+      <Card noPadding className="overflow-hidden">
+        <Table
+          headers={['Pasien', 'Kontak', 'Kunjungan Terakhir', 'Perawatan', 'Status', 'Aksi']}
+          className="[&_table]:border-0 [&_thead]:bg-gray-50/50 [&_th]:border-0 [&_th]:py-3.5 [&_th]:text-xs [&_th]:font-semibold [&_th]:text-gray-500 [&_th]:uppercase [&_th]:tracking-wide"
+        >
+          {filtered.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="py-12 text-center text-gray-400 text-sm">
+                Tidak ada pasien ditemukan
+              </td>
+            </tr>
+          ) : (
+            filtered.map((c) => (
+              <tr key={c.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-50 last:border-0">
+                <td className="py-3.5 px-6">
+                  <div className="flex items-center gap-3">
+                    {/* Menggunakan Avatar component */}
+                    <Avatar name={c.name} className="!w-9 !h-9 !bg-gradient-to-br !from-sky-400 !to-sky-600 !text-white !text-xs" />
+                    <div>
+                      <p className="font-semibold text-gray-800 text-sm">{c.name}</p>
+                      <p className="text-xs text-gray-400">{c.gender} · {c.age} tahun</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-3.5 px-4 hidden md:table-cell">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <Mail size={11} className="text-gray-400" />{c.email}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                      <Phone size={11} className="text-gray-300" />{c.phone}
+                    </div>
+                  </div>
+                </td>
+                <td className="py-3.5 px-4 hidden lg:table-cell">
+                  <p className="text-sm text-gray-700">{c.lastVisit}</p>
+                  <p className="text-xs text-gray-400">{c.totalVisits}x kunjungan</p>
+                </td>
+                <td className="py-3.5 px-4">
+                  <p className="text-sm text-gray-700 font-medium">{c.treatment}</p>
+                </td>
+                <td className="py-3.5 px-4">
+                  <StatusBadge status={c.status} />
+                </td>
+                <td className="py-3.5 px-4">
+                  {/* ✅ Shadcn UI Dropdown Menu — menu aksi per pasien */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none">
+                        <MoreHorizontal size={16} />
                       </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-52">
+                      <DropdownMenuLabel>Aksi untuk {c.name.split(' ')[0]}</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem onClick={() => navigate(`/customers/${c.id}`)}>
+                          <Eye size={14} className="text-sky-500" />
+                          <span>Lihat Detail</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {}}>
+                          <Edit2 size={14} className="text-amber-500" />
+                          <span>Edit Data Pasien</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {}}>
+                          <Calendar size={14} className="text-purple-500" />
+                          <span>Buat Jadwal Baru</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem onClick={() => {}}>
+                          <FileText size={14} className="text-emerald-500" />
+                          <span>Catatan Medis</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigator.clipboard?.writeText(c.phone)}>
+                          <Copy size={14} className="text-gray-400" />
+                          <span>Salin No. Telepon</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem variant="destructive" onClick={() => {}}>
+                        <Trash2 size={14} />
+                        <span>Hapus Pasien</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </td>
+              </tr>
+            ))
+          )}
+        </Table>
         <div className="px-6 py-3.5 border-t border-gray-50 bg-gray-50/30">
           <p className="text-xs text-gray-400">Menampilkan {filtered.length} dari {customers.length} pasien</p>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, Phone } from 'lucide-react';
+import Button from '../../components/Button';
+import InputField from '../../components/InputField';
+import Alert from '../../components/Alert';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -25,12 +28,6 @@ export default function Register() {
     }, 800);
   };
 
-  const fields = [
-    { id: 'name', label: 'Nama Lengkap', icon: User, type: 'text', placeholder: 'Dr. Nama Lengkap', key: 'name' },
-    { id: 'email', label: 'Email', icon: Mail, type: 'email', placeholder: 'dokter@klinik.id', key: 'email' },
-    { id: 'phone', label: 'No. Telepon', icon: Phone, type: 'tel', placeholder: '08xx-xxxx-xxxx', key: 'phone' },
-  ];
-
   return (
     <div>
       <div className="mb-6">
@@ -38,27 +35,54 @@ export default function Register() {
         <p className="text-gray-500 text-sm mt-1">Daftarkan klinik Anda ke DentaCare</p>
       </div>
 
+      {/* Error (menggunakan Alert component) */}
       {error && (
-        <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl">{error}</div>
+        <Alert type="danger" className="mb-4">
+          {error}
+        </Alert>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {fields.map(({ id, label, icon: Icon, type, placeholder, key }) => (
-          <div key={id}>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-            <div className="relative">
-              <Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type={type}
-                placeholder={placeholder}
-                value={form[key]}
-                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                className="input-field pl-10 focus:border-sky-500 focus:ring-sky-500" // Tambah fokus warna sky
-              />
-            </div>
-          </div>
-        ))}
+        {/* Nama Lengkap (menggunakan InputField component) */}
+        <div className="relative">
+          <InputField
+            label="Nama Lengkap"
+            type="text"
+            placeholder="Dr. Nama Lengkap"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="[&_input]:pl-10 [&_input]:focus:border-sky-500 [&_input]:focus:ring-sky-500"
+          />
+          <User size={15} className="absolute left-3.5 top-[38px] text-gray-400" />
+        </div>
 
+        {/* Email (menggunakan InputField component) */}
+        <div className="relative">
+          <InputField
+            label="Email"
+            type="email"
+            placeholder="dokter@klinik.id"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="[&_input]:pl-10 [&_input]:focus:border-sky-500 [&_input]:focus:ring-sky-500"
+          />
+          <Mail size={15} className="absolute left-3.5 top-[38px] text-gray-400" />
+        </div>
+
+        {/* No. Telepon (menggunakan InputField component) */}
+        <div className="relative">
+          <InputField
+            label="No. Telepon"
+            type="tel"
+            placeholder="08xx-xxxx-xxxx"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            className="[&_input]:pl-10 [&_input]:focus:border-sky-500 [&_input]:focus:ring-sky-500"
+          />
+          <Phone size={15} className="absolute left-3.5 top-[38px] text-gray-400" />
+        </div>
+
+        {/* Kata Sandi */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">Kata Sandi</label>
           <div className="relative">
@@ -76,6 +100,7 @@ export default function Register() {
           </div>
         </div>
 
+        {/* Konfirmasi Kata Sandi */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">Konfirmasi Kata Sandi</label>
           <div className="relative">
@@ -90,13 +115,15 @@ export default function Register() {
           </div>
         </div>
 
-        <button
-          type="submit"
+        {/* Tombol Daftar (menggunakan Button component) */}
+        <Button
+          type="primary"
+          className="w-full !py-2.5 !bg-sky-500 hover:!bg-sky-600 !font-semibold !rounded-xl justify-center disabled:!opacity-70"
           disabled={loading}
-          className="w-full py-2.5 bg-sky-500 text-white text-sm font-semibold rounded-xl hover:bg-sky-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+          onClick={handleSubmit}
         >
           {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Mendaftar...</> : 'Buat Akun'}
-        </button>
+        </Button>
       </form>
 
       <p className="text-center text-sm text-gray-500 mt-6">

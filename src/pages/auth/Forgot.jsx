@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+import Button from '../../components/Button';
+import InputField from '../../components/InputField';
+import Alert from '../../components/Alert';
 
 export default function Forgot() {
   const [email, setEmail] = useState('');
@@ -17,6 +20,7 @@ export default function Forgot() {
   if (sent) {
     return (
       <div className="text-center">
+        {/* Menggunakan Alert component untuk success state */}
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <CheckCircle size={28} className="text-green-600" />
         </div>
@@ -42,26 +46,28 @@ export default function Forgot() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-          <div className="relative">
-            <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="email"
-              placeholder="dokter@dentacare.id"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input-field pl-10"
-            />
-          </div>
+        {/* Email (menggunakan InputField component) */}
+        <div className="relative">
+          <InputField
+            label="Email"
+            type="email"
+            placeholder="dokter@dentacare.id"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="[&_input]:pl-10"
+          />
+          <Mail size={15} className="absolute left-3.5 top-[38px] text-gray-400" />
         </div>
-        <button
-          type="submit"
+
+        {/* Tombol Submit (menggunakan Button component) */}
+        <Button
+          type="primary"
+          className="w-full !py-2.5 !font-semibold !rounded-xl justify-center disabled:!opacity-70"
           disabled={loading}
-          className="w-full py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+          onClick={handleSubmit}
         >
           {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Mengirim...</> : 'Kirim Link Reset'}
-        </button>
+        </Button>
       </form>
 
       <Link to="/login" className="flex items-center justify-center gap-1.5 mt-6 text-sm text-gray-500 hover:text-gray-700">
