@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
-import Button from '../../components/Button';
-import InputField from '../../components/InputField';
-import Alert from '../../components/Alert';
+import Button from '../../../components/Button';
+import InputField from '../../../components/InputField';
+import Alert from '../../../components/Alert';
 
 export default function Forgot() {
   const [email, setEmail] = useState('');
