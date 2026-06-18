@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Stethoscope, Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -11,12 +11,27 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
+  // useRef: menyimpan referensi ke elemen DOM dropdown profile
+  // agar bisa mendeteksi klik di luar area dropdown
+  const profileDropdownRef = useRef(null);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // useEffect + useRef: menutup dropdown profile saat klik di luar elemennya
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleLogout = () => {
@@ -69,7 +84,7 @@ export default function Navbar() {
                 </Link>
               </>
             ) : (
-              <div className="relative">
+              <div className="relative" ref={profileDropdownRef}>
                 <button 
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   className="flex items-center gap-3 p-1 pr-3 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"

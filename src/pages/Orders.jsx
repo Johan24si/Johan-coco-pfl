@@ -8,6 +8,11 @@ import Button from '../components/Button';
 import Avatar from '../components/Avatar';
 import Table from '../components/Table';
 import InputField from '../components/InputField';
+
+// ✅ Import 3 custom hooks yang sudah dibuat
+import { useSearch } from '../hooks/useSearch';           // Hook 1: useState
+import { useLocalStorage } from '../hooks/useLocalStorage'; // Hook 2: useEffect + useState
+import { useClickOutside } from '../hooks/useClickOutside'; // Hook 3: useRef + useEffect
 import {
   Dialog,
   DialogContent,
@@ -46,18 +51,34 @@ function StatusBadge({ status }) {
 const FILTERS = ['Semua', 'Selesai', 'Menunggu', 'Proses', 'Batal'];
 
 export default function Orders() {
-  const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] = useState('Semua');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const filtered = orders.filter((o) => {
-    const matchSearch =
-      o.patientName.toLowerCase().includes(search.toLowerCase()) ||
-      o.treatment.toLowerCase().includes(search.toLowerCase()) ||
-      o.doctor.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = activeFilter === 'Semua' || o.status === activeFilter;
-    return matchSearch && matchFilter;
+  /**
+   * 🔵 HOOK 1 — useSearch (menggunakan useState di dalamnya)
+   * Mengelola state pencarian & filter sekaligus, dan
+   * mengembalikan data yang sudah difilter secara otomatis.
+   */
+  const { search, setSearch, activeFilter, setActiveFilter, filtered } = useSearch(
+    orders,
+    ['patientName', 'treatment', 'doctor'], // field yang dicari
+    'Semua'                                  // filter awal
+  );
+
+  /**
+   * 🟢 HOOK 2 — useLocalStorage (menggunakan useState + useEffect di dalamnya)
+   * Menyimpan filter terakhir yang dipilih user ke localStorage,
+   * sehingga saat halaman di-refresh, filter tidak reset ke 'Semua'.
+   */
+  const [savedFilter, setSavedFilter] = useLocalStorage('orders_last_filter', 'Semua');
+
+  /**
+   * 🔴 HOOK 3 — useClickOutside (menggunakan useRef + useEffect di dalamnya)
+   * Mendeteksi klik di luar area dialog detail order,
+   * lalu menutup dialog secara otomatis.
+   */
+  const dialogRef = useClickOutside(() => {
+    if (dialogOpen) setDialogOpen(false);
   });
 
   const formatFee = (fee) =>
@@ -106,9 +127,8 @@ export default function Orders() {
               <Button
                 key={f}
                 type={activeFilter === f ? 'primary' : 'secondary'}
-                className={`!px-3 !py-1.5 !rounded-lg !text-xs !font-medium ${
-                  activeFilter !== f ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 !border-transparent' : ''
-                }`}
+                className={`!px-3 !py-1.5 !rounded-lg !text-xs !font-medium ${activeFilter !== f ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 !border-transparent' : ''
+                  }`}
                 onClick={() => setActiveFilter(f)}
               >
                 {f}
