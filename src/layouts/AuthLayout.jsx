@@ -1,9 +1,16 @@
 import { Outlet, Navigate } from 'react-router-dom';
 import klinikImg from '../assets/dentacare.jpg';
+import { useAuthContext } from '../context/AuthContext';
 
 export default function AuthLayout() {
-  const isLoggedIn = localStorage.getItem('isLoggedIn');
-  if (isLoggedIn) return <Navigate to="/dashboard" replace />;
+  const { user, loading } = useAuthContext();
+
+  // Wait for session rehydration before deciding
+  if (loading) return null;
+
+  // If already logged in, redirect to the correct area
+  if (user?.role === 'admin') return <Navigate to="/dashboard" replace />;
+  if (user?.role === 'member') return <Navigate to="/member/dashboard" replace />;
 
   return (
     <div className="min-h-screen flex">

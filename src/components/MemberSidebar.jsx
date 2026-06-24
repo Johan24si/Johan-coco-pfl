@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Calendar, ClipboardList, CreditCard,
   LogOut, User, X, Star, Tag, Bell, MapPin, Stethoscope
 } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuthContext } from '../context/AuthContext';
 
 const navItems = [
   { path: '/member/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -26,12 +26,12 @@ const guestLinks = [
 ];
 
 export default function MemberSidebar({ isMobileOpen, setIsMobileOpen }) {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthContext();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate('/guest/login', { replace: true });
   };
 
   const getInitials = (name) => {

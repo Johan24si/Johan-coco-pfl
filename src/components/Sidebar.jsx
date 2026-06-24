@@ -1,8 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Wrench,
-  LogOut, Stethoscope, ChevronRight, Layers,
+  LogOut, Stethoscope, ChevronRight,
 } from 'lucide-react';
+import { useAuthContext } from '../context/AuthContext';
 
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -13,11 +14,21 @@ const navItems = [
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const { user, logout } = useAuthContext();
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    navigate('/login');
+    logout();
+    navigate('/login', { replace: true });
   };
+
+  // Build display name & initials from session
+  const displayName = user?.name ?? 'Admin';
+  const initials = displayName
+    .split(' ')
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-30">
@@ -68,11 +79,11 @@ export default function Sidebar() {
         <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-50 transition-colors">
           {/* Mengubah gradient avatar dari blue ke sky */}
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            AS
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-800 truncate">Dr. Andi Susanto</p>
-            <p className="text-xs text-gray-400 truncate">Dokter Gigi</p>
+            <p className="text-sm font-semibold text-gray-800 truncate">{displayName}</p>
+            <p className="text-xs text-gray-400 truncate">{user?.role ?? 'Admin'}</p>
           </div>
           <button
             onClick={handleLogout}

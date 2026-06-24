@@ -1,34 +1,50 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Stethoscope } from 'lucide-react';
+import { Eye, EyeOff, Stethoscope, AlertCircle } from 'lucide-react';
 import Card from '../../../components/Card';
 import Button from '../../../components/Button';
 import InputField from '../../../components/InputField';
 import Alert from '../../../components/Alert';
+import { adminLogin } from '../../../lib/supabaseService';
+import { useAuthContext } from '../../../context/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuthContext();
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({ email: '', password: '', remember: false });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
     if (!form.email || !form.password) {
       setError('Email dan kata sandi wajib diisi.');
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      localStorage.setItem('dentacare_member_token', 'admin-token');
-      localStorage.setItem('dentacare_member_name', 'Administrator');
-      localStorage.setItem('dentacare_member_email', form.email);
-      localStorage.setItem('dentacare_member_role', 'admin');
-      localStorage.setItem('isLoggedIn', 'true');
-      window.location.href = '/dashboard';
-    }, 800);
+    try {
+      const { data, error: authError } = await adminLogin({
+        email: form.email,
+        password: form.password,
+      });
+
+      if (authError) {
+        setError(authError);
+        return;
+      }
+
+      // Save session: { id, name, email, role }
+      login({ id: data.id, name: data.name, email: data.email, role: data.role ?? 'admin' });
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,20 +56,20 @@ export default function Login() {
       </div>
 
       {/* ── Judul ── */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Portal Dokter & Staf</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">Portal Dokter &amp; Staf</h1>
       <p className="text-sm text-gray-500 mb-7">Masuk untuk mengelola klinik DentaCare</p>
 
       {/* ── Card Form ── */}
       <Card className="w-full !p-7">
-        
-        {/* Pesan error */}
+
         {error && (
-          <Alert type="danger" className="mb-4">
-            {error}
+          <Alert type="danger" className="mb-4 flex items-start gap-2">
+            <AlertCircle size={15} className="mt-0.5 shrink-0" />
+            <span>{error}</span>
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
           <InputField
             label="Alamat Email Staf"
             type="email"
@@ -76,7 +92,7 @@ export default function Login() {
               />
               <button
                 type="button"
-                onClick={() => setShowPass(!showPass)}
+                onClick={() => setShowPass((v) => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900"
               >
                 {showPass ? <EyeOff size={17} /> : <Eye size={17} />}
@@ -91,7 +107,7 @@ export default function Login() {
                 type="checkbox"
                 checked={form.remember}
                 onChange={(e) => setForm({ ...form, remember: e.target.checked })}
-                className="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 accent-gray-900"
+                className="w-4 h-4 rounded border-gray-300 accent-gray-900"
               />
               <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Ingat saya</span>
             </label>
@@ -107,19 +123,25 @@ export default function Login() {
             disabled={loading}
             onClick={handleSubmit}
           >
-            {loading ? (
-              <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Memuat...</>
-            ) : 'Masuk sebagai Admin'}
+            {loading
+              ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Memuat...</>
+              : 'Masuk sebagai Admin'}
           </Button>
         </form>
 
         <p className="mt-5 text-sm text-center text-gray-500">
-          Klinik baru? <Link to="/register" className="text-gray-900 font-medium hover:underline">Daftarkan klinik Anda</Link>
+          Klinik baru?{' '}
+          <Link to="/register" className="text-gray-900 font-medium hover:underline">
+            Daftarkan klinik Anda
+          </Link>
         </p>
       </Card>
-      
+
       <p className="mt-8 text-sm text-center text-gray-500">
-        Anda pasien DentaCare? <Link to="/guest/login" className="text-[#0891b2] font-semibold hover:text-cyan-700">Masuk di sini</Link>
+        Anda pasien DentaCare?{' '}
+        <Link to="/guest/login" className="text-[#0891b2] font-semibold hover:text-cyan-700">
+          Masuk di sini
+        </Link>
       </p>
     </div>
   );

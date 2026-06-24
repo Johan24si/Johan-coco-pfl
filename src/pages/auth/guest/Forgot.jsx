@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle, Stethoscope } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle, AlertCircle, Stethoscope } from 'lucide-react';
 import Button from '../../../components/Button';
 import InputField from '../../../components/InputField';
 import Alert from '../../../components/Alert';
+import { supabase } from '../../../lib/supabase';
 
 export default function Forgot() {
   const [email, setEmail] = useState('');
@@ -11,18 +12,33 @@ export default function Forgot() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email) {
+    setError('');
+
+    if (!email.trim()) {
       setError('Masukkan alamat email Anda.');
       return;
     }
+
     setLoading(true);
-    setError('');
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // Check if this email is registered in the members table
+      const { data, error: dbError } = await supabase
+        .from('members')
+        .select('id')
+        .eq('email', email.trim())
+        .maybeSingle();
+
+      if (dbError) throw new Error(dbError.message);
+
+      // Always show success to prevent email enumeration attacks
       setSubmitted(true);
-    }, 1000);
+    } catch (err) {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,9 +54,14 @@ export default function Forgot() {
             Masukkan email yang terdaftar untuk akun pasien Anda. Kami akan mengirimkan instruksi untuk mereset kata sandi Anda.
           </p>
 
-          {error && <Alert type="danger" className="w-full mb-4">{error}</Alert>}
+          {error && (
+            <Alert type="danger" className="w-full mb-4 flex items-start gap-2">
+              <AlertCircle size={15} className="mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </Alert>
+          )}
 
-          <form onSubmit={handleSubmit} className="w-full space-y-4">
+          <form onSubmit={handleSubmit} className="w-full space-y-4" noValidate>
             <div className="relative">
               <InputField
                 label="Alamat Email"
@@ -59,7 +80,9 @@ export default function Forgot() {
               disabled={loading}
               onClick={handleSubmit}
             >
-              {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Mengirim...</> : 'Kirim Link Reset'}
+              {loading
+                ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Mengirim...</>
+                : 'Kirim Link Reset'}
             </Button>
           </form>
         </>
@@ -70,12 +93,12 @@ export default function Forgot() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Periksa Email Anda</h1>
           <p className="text-gray-500 text-sm mb-8">
-            Kami telah mengirimkan instruksi reset kata sandi ke <strong>{email}</strong>
+            Jika email <strong>{email}</strong> terdaftar, Anda akan menerima instruksi reset kata sandi segera.
           </p>
           <Button
             type="outline"
             className="w-full !py-2.5 !font-semibold !rounded-xl justify-center"
-            onClick={() => setSubmitted(false)}
+            onClick={() => { setSubmitted(false); setEmail(''); }}
           >
             Kirim Ulang Email
           </Button>
@@ -83,7 +106,10 @@ export default function Forgot() {
       )}
 
       <div className="mt-8 text-center">
-        <Link to="/guest/login" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#0891b2] font-medium transition-colors">
+        <Link
+          to="/guest/login"
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#0891b2] font-medium transition-colors"
+        >
           <ArrowLeft size={16} />
           Kembali ke Login
         </Link>

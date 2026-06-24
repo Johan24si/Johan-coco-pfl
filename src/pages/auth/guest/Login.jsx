@@ -1,34 +1,50 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Stethoscope } from 'lucide-react';
+import { Eye, EyeOff, Stethoscope, AlertCircle, CheckCircle } from 'lucide-react';
 import Card from '../../../components/Card';
 import Button from '../../../components/Button';
 import InputField from '../../../components/InputField';
 import Alert from '../../../components/Alert';
+import { memberLogin } from '../../../lib/supabaseService';
+import { useAuthContext } from '../../../context/AuthContext';
 
 export default function MemberLogin() {
   const navigate = useNavigate();
+  const { login } = useAuthContext();
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({ email: '', password: '', remember: false });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
     if (!form.email || !form.password) {
       setError('Email dan kata sandi wajib diisi.');
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      // Mock login as member
-      localStorage.setItem('dentacare_member_token', 'member-token');
-      localStorage.setItem('dentacare_member_name', 'Budi Santoso');
-      localStorage.setItem('dentacare_member_email', form.email);
-      localStorage.setItem('dentacare_member_role', 'member');
-      window.location.href = '/member/dashboard';
-    }, 800);
+    try {
+      const { data, error: authError } = await memberLogin({
+        email: form.email,
+        password: form.password,
+      });
+
+      if (authError) {
+        setError(authError);
+        return;
+      }
+
+      // Save member session: { id, name, email, role: 'member' }
+      login({ id: data.id, name: data.name, email: data.email, role: 'member' });
+      navigate('/member/dashboard', { replace: true });
+    } catch (err) {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,15 +61,15 @@ export default function MemberLogin() {
 
       {/* ── Card Form ── */}
       <Card className="w-full !p-7">
-        
-        {/* Pesan error */}
+
         {error && (
-          <Alert type="danger" className="mb-4">
-            {error}
+          <Alert type="danger" className="mb-4 flex items-start gap-2">
+            <AlertCircle size={15} className="mt-0.5 shrink-0" />
+            <span>{error}</span>
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
           <InputField
             label="Alamat Email"
             type="email"
@@ -76,7 +92,7 @@ export default function MemberLogin() {
               />
               <button
                 type="button"
-                onClick={() => setShowPass(!showPass)}
+                onClick={() => setShowPass((v) => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0891b2]"
               >
                 {showPass ? <EyeOff size={17} /> : <Eye size={17} />}
@@ -91,9 +107,11 @@ export default function MemberLogin() {
                 type="checkbox"
                 checked={form.remember}
                 onChange={(e) => setForm({ ...form, remember: e.target.checked })}
-                className="w-4 h-4 rounded border-gray-300 text-[#0891b2] focus:ring-[#0891b2] accent-[#0891b2]"
+                className="w-4 h-4 rounded border-gray-300 accent-[#0891b2]"
               />
-              <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Ingat saya</span>
+              <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+                Ingat saya
+              </span>
             </label>
             <Link to="/guest/forgot" className="text-sm text-[#0891b2] font-medium hover:text-cyan-700 transition-colors">
               Lupa kata sandi?
@@ -107,14 +125,17 @@ export default function MemberLogin() {
             disabled={loading}
             onClick={handleSubmit}
           >
-            {loading ? (
-              <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Memuat...</>
-            ) : 'Masuk'}
+            {loading
+              ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Memuat...</>
+              : 'Masuk'}
           </Button>
         </form>
 
         <p className="mt-5 text-sm text-center text-gray-500">
-          Belum punya akun? <Link to="/guest/register" className="text-[#0891b2] font-medium hover:text-cyan-700">Daftar sekarang</Link>
+          Belum punya akun?{' '}
+          <Link to="/guest/register" className="text-[#0891b2] font-medium hover:text-cyan-700">
+            Daftar sekarang
+          </Link>
         </p>
       </Card>
     </div>
