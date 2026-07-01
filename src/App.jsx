@@ -26,6 +26,7 @@ const Register = React.lazy(() => import("./pages/auth/Register"));
 const Forgot = React.lazy(() => import("./pages/auth/Forgot"));
 
 // ── Guest / Public Pages ──
+const LandingPage = React.lazy(() => import("./pages/LandingPage"));
 const GuestPage = React.lazy(() => import("./pages/GuestPage"));
 const LayananPage = React.lazy(() => import("./pages/guest/LayananPage"));
 const PromoPage = React.lazy(() => import("./pages/guest/PromoPage"));
@@ -55,6 +56,7 @@ export default function App() {
           <Routes>
 
             {/* ── Guest / Public Routes ── */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/guest" element={<GuestPage />} />
             <Route path="/guest/layanan" element={<LayananPage />} />
             <Route path="/guest/promo" element={<PromoPage />} />
@@ -84,7 +86,6 @@ export default function App() {
 
             {/* ── Admin Routes ── */}
             <Route element={<MainLayouts />}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/customers" element={<Customers />} />
