@@ -39,11 +39,10 @@ function MemberModal({ member, onSave, onClose, saving }) {
   const isEdit = !!member;
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({
-    name:     member?.name    ?? '',
+    nama:     member?.nama    ?? '',
     email:    member?.email   ?? '',
-    phone:    member?.phone   ?? '',
-    address:  member?.address ?? '',
-    password: '',
+    telepon:  member?.telepon ?? '',
+    alamat:   member?.alamat  ?? '',
   });
 
   const handleChange = (field) => (e) =>
@@ -51,12 +50,11 @@ function MemberModal({ member, onSave, onClose, saving }) {
 
   const handleSave = () => {
     const payload = {
-      name: form.name,
+      nama: form.nama,
       email: form.email,
-      phone: form.phone,
-      address: form.address,
+      telepon: form.telepon,
+      alamat: form.alamat,
     };
-    if (form.password) payload.password = form.password;
     onSave(member?.id ?? null, payload);
   };
 
@@ -81,8 +79,8 @@ function MemberModal({ member, onSave, onClose, saving }) {
             <InputField
               label="Nama Lengkap"
               type="text"
-              value={form.name}
-              onChange={handleChange('name')}
+              value={form.nama}
+              onChange={handleChange('nama')}
               placeholder="Nama lengkap member"
               className="[&_input]:focus:border-sky-500 [&_input]:focus:ring-sky-500/10"
             />
@@ -105,8 +103,8 @@ function MemberModal({ member, onSave, onClose, saving }) {
             <InputField
               label="No. Telepon"
               type="tel"
-              value={form.phone}
-              onChange={handleChange('phone')}
+              value={form.telepon}
+              onChange={handleChange('telepon')}
               placeholder="0812-xxxx-xxxx"
               className="[&_input]:focus:border-sky-500 [&_input]:focus:ring-sky-500/10"
             />
@@ -120,8 +118,8 @@ function MemberModal({ member, onSave, onClose, saving }) {
             <div className="relative">
               <MapPin size={14} className="absolute left-3.5 top-3 text-gray-400" />
               <textarea
-                value={form.address}
-                onChange={handleChange('address')}
+                value={form.alamat}
+                onChange={handleChange('alamat')}
                 placeholder="Jl. Contoh No. 1, Kota"
                 rows={2}
                 className="w-full pl-10 pr-3.5 py-2.5 text-sm border border-gray-300 rounded-lg outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/10 transition resize-none"
@@ -129,29 +127,7 @@ function MemberModal({ member, onSave, onClose, saving }) {
             </div>
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              {isEdit ? 'Kata Sandi Baru (opsional)' : 'Kata Sandi'}
-            </label>
-            <div className="relative">
-              <KeyRound size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type={showPass ? 'text' : 'password'}
-                placeholder={isEdit ? 'Kosongkan jika tidak diubah' : 'Min. 6 karakter'}
-                value={form.password}
-                onChange={handleChange('password')}
-                className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/10 transition"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPass((v) => !v)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-          </div>
+
         </div>
 
         <div className="flex gap-3 mt-6">
@@ -198,19 +174,15 @@ export default function Customers() {
   const filtered = members.filter((m) => {
     const q = search.toLowerCase();
     return (
-      (m.name    ?? '').toLowerCase().includes(q) ||
+      (m.nama    ?? '').toLowerCase().includes(q) ||
       (m.email   ?? '').toLowerCase().includes(q) ||
-      (m.phone   ?? '').toLowerCase().includes(q) ||
-      (m.address ?? '').toLowerCase().includes(q)
+      (m.telepon ?? '').toLowerCase().includes(q) ||
+      (m.alamat  ?? '').toLowerCase().includes(q)
     );
   });
 
   const handleSave = async (id, formData) => {
-    if (!id && !formData.password) {
-      showToast('Kata sandi wajib diisi untuk member baru.', 'error');
-      return;
-    }
-    if (!formData.name || !formData.email) {
+    if (!formData.nama || !formData.email) {
       showToast('Nama dan email wajib diisi.', 'error');
       return;
     }
@@ -237,10 +209,10 @@ export default function Customers() {
     setDeleteLoading(true);
     try {
       await removeMember(deleteTarget.id);
-      showToast(`Member ${deleteTarget.name} berhasil dihapus.`);
+      showToast(`Data pasien ${deleteTarget.nama} berhasil dihapus.`);
       setDeleteTarget(null);
     } catch (err) {
-      showToast(err.message ?? 'Gagal menghapus member.', 'error');
+      showToast(err.message ?? 'Gagal menghapus pasien.', 'error');
     } finally {
       setDeleteLoading(false);
     }
@@ -278,7 +250,7 @@ export default function Customers() {
 
       <PageHeader
         title="Data Member / Pasien"
-        subtitle={`${members.length} member terdaftar di Supabase`}
+        subtitle={`${members.length} pasien terdaftar di Supabase`}
         action={
           <div className="flex items-center gap-2">
             <Button type="secondary" className="flex items-center gap-1.5 !text-xs" onClick={refetch}>
@@ -289,7 +261,7 @@ export default function Customers() {
               className="flex items-center gap-2"
               onClick={() => setModalTarget(null)}
             >
-              <Plus size={15} />Tambah Member
+              <Plus size={15} />Tambah Pasien
             </Button>
           </div>
         }
@@ -340,11 +312,11 @@ export default function Customers() {
                 <td className="py-3.5 px-6">
                   <div className="flex items-center gap-3">
                     <Avatar
-                      name={m.name ?? m.email}
+                      name={m.nama ?? m.email}
                       className="!w-9 !h-9 !bg-gradient-to-br !from-sky-400 !to-sky-600 !text-white !text-xs shrink-0"
                     />
                     <div>
-                      <p className="font-semibold text-gray-800 text-sm">{m.name}</p>
+                      <p className="font-semibold text-gray-800 text-sm">{m.nama}</p>
                       <p className="text-xs text-gray-400">{m.email}</p>
                     </div>
                   </div>
@@ -357,10 +329,10 @@ export default function Customers() {
                       <Mail size={11} className="text-gray-400 shrink-0" />
                       <span className="truncate max-w-[150px]">{m.email}</span>
                     </div>
-                    {m.phone && (
+                    {m.telepon && (
                       <div className="flex items-center gap-1.5 text-xs text-gray-400">
                         <Phone size={11} className="text-gray-300 shrink-0" />
-                        {m.phone}
+                        {m.telepon}
                       </div>
                     )}
                   </div>
@@ -368,9 +340,9 @@ export default function Customers() {
 
                 {/* Alamat */}
                 <td className="py-3.5 px-4 hidden lg:table-cell">
-                  {m.address ? (
-                    <p className="text-xs text-gray-500 max-w-[160px] truncate" title={m.address}>
-                      {m.address}
+                  {m.alamat ? (
+                    <p className="text-xs text-gray-500 max-w-[160px] truncate" title={m.alamat}>
+                      {m.alamat}
                     </p>
                   ) : (
                     <span className="text-xs text-gray-300 italic">—</span>
@@ -398,7 +370,7 @@ export default function Customers() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuLabel>
-                        Aksi untuk {(m.name ?? m.email).split(' ')[0]}
+                        Aksi untuk {(m.nama ?? m.email).split(' ')[0]}
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuGroup>
@@ -412,9 +384,9 @@ export default function Customers() {
                           <Mail size={14} className="text-gray-400" />
                           <span>Salin Email</span>
                         </DropdownMenuItem>
-                        {m.phone && (
+                        {m.telepon && (
                           <DropdownMenuItem
-                            onClick={() => navigator.clipboard?.writeText(m.phone)}
+                            onClick={() => navigator.clipboard?.writeText(m.telepon)}
                           >
                             <Phone size={14} className="text-gray-400" />
                             <span>Salin Telepon</span>
@@ -427,7 +399,7 @@ export default function Customers() {
                         onClick={() => setDeleteTarget(m)}
                       >
                         <Trash2 size={14} />
-                        <span>Hapus Member</span>
+                        <span>Hapus Pasien</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -460,10 +432,10 @@ export default function Customers() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Member?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Pasien?</AlertDialogTitle>
             <AlertDialogDescription>
-              Anda yakin ingin menghapus member{' '}
-              <strong className="text-gray-700">{deleteTarget?.name}</strong>?{' '}
+              Anda yakin ingin menghapus data pasien{' '}
+              <strong className="text-gray-700">{deleteTarget?.nama}</strong>?{' '}
               Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>

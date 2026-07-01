@@ -1,23 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  fetchAllMembers,
-  createMember,
-  updateMember,
-  deleteMember,
+  fetchAllPasien,
+  createPasien,
+  updatePasien,
+  deletePasien,
 } from '../lib/supabaseService';
 
-/**
- * useMembers — custom hook for admin CRUD on the `members` Supabase table.
- *
- * Returns:
- *  - members    : Member[]
- *  - loading    : boolean
- *  - error      : string | null
- *  - refetch()  : re-fetch all members
- *  - addMember(data)         : insert new member
- *  - editMember(id, updates) : update member by id
- *  - removeMember(id)        : delete member by id
- */
 export function useMembers() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +14,7 @@ export function useMembers() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const { data, error: fetchError } = await fetchAllMembers();
+    const { data, error: fetchError } = await fetchAllPasien();
     if (fetchError) {
       setError(fetchError);
     } else {
@@ -40,21 +28,21 @@ export function useMembers() {
   }, [load]);
 
   const addMember = useCallback(async (formData) => {
-    const { data, error: createError } = await createMember(formData);
+    const { data, error: createError } = await createPasien(formData);
     if (createError) throw new Error(createError);
     setMembers((prev) => [data, ...prev]);
     return data;
   }, []);
 
   const editMember = useCallback(async (id, updates) => {
-    const { data, error: updateError } = await updateMember(id, updates);
+    const { data, error: updateError } = await updatePasien(id, updates);
     if (updateError) throw new Error(updateError);
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...data } : m)));
     return data;
   }, []);
 
   const removeMember = useCallback(async (id) => {
-    const { error: deleteError } = await deleteMember(id);
+    const { error: deleteError } = await deletePasien(id);
     if (deleteError) throw new Error(deleteError);
     setMembers((prev) => prev.filter((m) => m.id !== id));
   }, []);

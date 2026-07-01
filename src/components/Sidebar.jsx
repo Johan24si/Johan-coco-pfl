@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Wrench,
-  LogOut, Stethoscope, ChevronRight,
+  LogOut, Stethoscope, ChevronRight, Shield
 } from 'lucide-react';
 import { useAuthContext } from '../context/AuthContext';
 
@@ -10,6 +10,7 @@ const navItems = [
   { path: '/customers', icon: Users, label: 'Pasien' },
   { path: '/orders', icon: Calendar, label: 'Jadwal' },
   { path: '/service', icon: Wrench, label: 'Layanan' },
+  { path: '/users', icon: Shield, label: 'Pengguna' },
 ];
 
 export default function Sidebar() {

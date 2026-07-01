@@ -1,13 +1,51 @@
-import { useState } from 'react';
-import { TrendingUp, Gift, ArrowUpCircle, ArrowDownCircle, Star } from 'lucide-react';
-import { MOCK_LOYALTY } from '../../data/memberData';
+import { useState, useEffect } from 'react';
+import { TrendingUp, Gift, ArrowUpCircle, ArrowDownCircle, Star, Loader2, AlertCircle } from 'lucide-react';
+import { fetchMyPointTransactions, fetchMyProfile } from '../../lib/supabaseService';
 
 export default function LoyaltyPoint() {
-  const { totalPoin, level, nextLevel, nextLevelPoin, history, rewards } = MOCK_LOYALTY;
+  const [profile, setProfile] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [redeemModal, setRedeemModal] = useState(null);
   const [toast, setToast] = useState('');
   const [tab, setTab] = useState('semua');
 
+  // Hardcoded rewards to simulate redemption catalog
+  const rewards = [
+    { id: 1, name: 'Diskon 50% Scaling', poin: 500, stock: 12, icon: '🦷' },
+    { id: 2, name: 'Gratis Konsultasi Dokter Spesialis', poin: 1000, stock: 5, icon: '👨‍⚕️' },
+    { id: 3, name: 'Voucher Perawatan Whitening Rp 500k', poin: 2500, stock: 3, icon: '✨' },
+    { id: 4, name: 'Sikat Gigi Elektrik Premium', poin: 3000, stock: 10, icon: '🪥' },
+  ];
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const [profRes, histRes] = await Promise.all([
+        fetchMyProfile(),
+        fetchMyPointTransactions()
+      ]);
+      
+      if (profRes.error) setError(profRes.error);
+      else setProfile(profRes.data);
+
+      if (histRes.error) setError(histRes.error);
+      else setHistory(histRes.data || []);
+      
+      setLoading(false);
+    }
+    loadData();
+  }, []);
+
+  const totalPoin = profile?.points || 0;
+  const level = profile?.tiers?.name || 'Bronze';
+  
+  // Progress logic (simulasi next level jika tidak tau list semua tier di sini)
+  // Idealnya ambil list tiers, tapi kita pakai simple math saja untuk demo
+  const nextLevel = level === 'Bronze' ? 'Silver' : level === 'Silver' ? 'Gold' : level === 'Gold' ? 'Platinum' : 'Max';
+  const nextLevelPoin = level === 'Bronze' ? 100 : level === 'Silver' ? 500 : level === 'Gold' ? 1000 : totalPoin;
   const progress = Math.min((totalPoin / nextLevelPoin) * 100, 100);
 
   const showToast = (msg) => {
@@ -20,13 +58,22 @@ export default function LoyaltyPoint() {
       showToast('Poin Anda tidak cukup untuk menukarkan reward ini.');
       return;
     }
-    showToast(`🎉 Berhasil menukar "${reward.name}"! Cek voucher Anda.`);
+    // TODO: implement real point deduction via Supabase RPC/Backend
+    showToast(`🎉 Berhasil menukar "${reward.name}"! Cek voucher Anda (Simulasi).`);
     setRedeemModal(null);
   };
 
   const filtered = tab === 'semua' ? history
-    : tab === 'masuk' ? history.filter(h => h.type === 'masuk')
-    : history.filter(h => h.type === 'keluar');
+    : tab === 'masuk' ? history.filter(h => h.transaction_type === 'earn')
+    : history.filter(h => h.transaction_type === 'redeem');
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-24"><Loader2 size={32} className="animate-spin text-cyan-600" /></div>;
+  }
+
+  if (error) {
+    return <div className="flex flex-col items-center justify-center py-24 gap-3 text-red-500"><AlertCircle size={32} /> <p>{error}</p></div>;
+  }
 
   return (
     <div className="space-y-6 relative">
@@ -63,29 +110,31 @@ export default function LoyaltyPoint() {
           </div>
 
           {/* Progress to next level */}
-          <div>
-            <div className="flex justify-between text-xs text-cyan-200 mb-2">
-              <span>Menuju {nextLevel}</span>
-              <span>{totalPoin} / {nextLevelPoin} poin</span>
+          {nextLevel !== 'Max' && (
+            <div>
+              <div className="flex justify-between text-xs text-cyan-200 mb-2">
+                <span>Menuju {nextLevel}</span>
+                <span>{totalPoin} / {nextLevelPoin} poin</span>
+              </div>
+              <div className="w-full bg-white/20 rounded-full h-2.5">
+                <div
+                  className="bg-white h-2.5 rounded-full transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-xs text-cyan-200 mt-2">
+                Kurang <strong className="text-white">{(nextLevelPoin - totalPoin).toLocaleString()} poin</strong> lagi untuk naik ke {nextLevel}
+              </p>
             </div>
-            <div className="w-full bg-white/20 rounded-full h-2.5">
-              <div
-                className="bg-white h-2.5 rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <p className="text-xs text-cyan-200 mt-2">
-              Kurang <strong className="text-white">{(nextLevelPoin - totalPoin).toLocaleString()} poin</strong> lagi untuk naik ke {nextLevel}
-            </p>
-          </div>
+          )}
         </div>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Poin Masuk', value: `+${history.filter(h => h.type === 'masuk').reduce((a, b) => a + b.poin, 0)}`, icon: <ArrowUpCircle size={20} className="text-green-500" />, color: 'bg-green-50' },
-          { label: 'Poin Keluar', value: `${history.filter(h => h.type === 'keluar').reduce((a, b) => a + b.poin, 0)}`, icon: <ArrowDownCircle size={20} className="text-red-500" />, color: 'bg-red-50' },
+          { label: 'Poin Masuk', value: `+${history.filter(h => h.transaction_type === 'earn').reduce((a, b) => a + b.points, 0)}`, icon: <ArrowUpCircle size={20} className="text-green-500" />, color: 'bg-green-50' },
+          { label: 'Poin Keluar', value: `${history.filter(h => h.transaction_type === 'redeem').reduce((a, b) => a + Math.abs(b.points), 0)}`, icon: <ArrowDownCircle size={20} className="text-red-500" />, color: 'bg-red-50' },
           { label: 'Total Transaksi', value: history.length, icon: <TrendingUp size={20} className="text-blue-500" />, color: 'bg-blue-50' },
         ].map((s, i) => (
           <div key={i} className={`${s.color} border border-gray-100 p-4 rounded-2xl text-center`}>
@@ -156,25 +205,32 @@ export default function LoyaltyPoint() {
         </div>
 
         <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
-          {filtered.map((item, i) => (
-            <div key={item.id} className={`flex items-center gap-4 px-5 py-4 ${i > 0 ? 'border-t border-gray-50' : ''} hover:bg-gray-50 transition-colors`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                item.type === 'masuk' ? 'bg-green-100' : 'bg-red-100'
-              }`}>
-                {item.type === 'masuk'
-                  ? <ArrowUpCircle size={20} className="text-green-600" />
-                  : <ArrowDownCircle size={20} className="text-red-500" />
-                }
+          {filtered.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 text-sm">Belum ada riwayat transaksi poin.</div>
+          ) : (
+            filtered.map((item, i) => (
+              <div key={item.id} className={`flex items-center gap-4 px-5 py-4 ${i > 0 ? 'border-t border-gray-50' : ''} hover:bg-gray-50 transition-colors`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  item.transaction_type === 'earn' ? 'bg-green-100' : 'bg-red-100'
+                }`}>
+                  {item.transaction_type === 'earn'
+                    ? <ArrowUpCircle size={20} className="text-green-600" />
+                    : <ArrowDownCircle size={20} className="text-red-500" />
+                  }
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900">{item.description}</p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(item.created_at).toLocaleDateString('id-ID', { dateStyle: 'medium' })}
+                    {item.jadwal && ` • Kunjungan: ${item.jadwal.layanan?.nama}`}
+                  </p>
+                </div>
+                <span className={`font-black text-base ${item.transaction_type === 'earn' ? 'text-green-600' : 'text-red-500'}`}>
+                  {item.transaction_type === 'earn' ? '+' : ''}{item.points}
+                </span>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">{item.desc}</p>
-                <p className="text-xs text-gray-400">{item.date}</p>
-              </div>
-              <span className={`font-black text-base ${item.type === 'masuk' ? 'text-green-600' : 'text-red-500'}`}>
-                {item.type === 'masuk' ? '+' : ''}{item.poin}
-              </span>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 

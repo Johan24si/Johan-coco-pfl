@@ -363,7 +363,7 @@ function RegisterForm() {
       </button>
 
       <p className="text-center text-sm text-gray-500 mt-4">
-        Sudah punya akun? <Link to="/guest/login" className="text-[#0891b2] font-semibold hover:underline">Login di sini</Link>
+        Sudah punya akun? <Link to="/login" className="text-[#0891b2] font-semibold hover:underline">Login di sini</Link>
       </p>
     </form>
   );

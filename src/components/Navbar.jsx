@@ -36,7 +36,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/guest/login');
+    navigate('/login');
   };
 
   const isGuestPage = location.pathname === '/';
@@ -76,10 +76,10 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {!user ? (
               <>
-                <Link to="/guest/login" className="px-5 py-2.5 text-sm font-semibold text-[#0891b2] bg-white border border-[#0891b2] rounded-lg hover:bg-cyan-50 transition-colors">
+                <Link to="/login" className="px-5 py-2.5 text-sm font-semibold text-[#0891b2] bg-white border border-[#0891b2] rounded-lg hover:bg-cyan-50 transition-colors">
                   Login
                 </Link>
-                <Link to="/guest/register" className="px-5 py-2.5 text-sm font-semibold text-white bg-[#0891b2] rounded-lg shadow-md hover:bg-cyan-700 transition-colors">
+                <Link to="/register" className="px-5 py-2.5 text-sm font-semibold text-white bg-[#0891b2] rounded-lg shadow-md hover:bg-cyan-700 transition-colors">
                   Daftar
                 </Link>
               </>
@@ -151,12 +151,8 @@ export default function Navbar() {
               <div className="flex flex-col gap-3">
                 <p className="text-sm text-gray-500 font-medium px-1">Masuk / Daftar</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <Link to="/guest/login" onClick={() => setMobileMenuOpen(false)} className="py-2.5 text-center text-sm font-semibold text-[#0891b2] border border-[#0891b2] rounded-lg">Masuk Pasien</Link>
-                  <Link to="/guest/register" onClick={() => setMobileMenuOpen(false)} className="py-2.5 text-center text-sm font-semibold text-white bg-[#0891b2] rounded-lg">Daftar Pasien</Link>
-                </div>
-                <div className="grid grid-cols-2 gap-3 mt-1">
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="py-2.5 text-center text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg">Login Klinik</Link>
-                  <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="py-2.5 text-center text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg">Daftar Klinik</Link>
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="py-2.5 text-center text-sm font-semibold text-[#0891b2] border border-[#0891b2] rounded-lg">Masuk</Link>
+                  <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="py-2.5 text-center text-sm font-semibold text-white bg-[#0891b2] rounded-lg">Daftar</Link>
                 </div>
               </div>
             ) : (

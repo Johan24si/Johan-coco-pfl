@@ -1,63 +1,102 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase } from '../lib/supabase';
+import { signOut, getActiveSession } from '../lib/supabaseService';
 
 const AuthContext = createContext(null);
 
-// Session key for localStorage
-const SESSION_KEY = 'dentacare_session';
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser]       = useState(null);  // profile dari tabel profiles
   const [loading, setLoading] = useState(true);
 
-  // Rehydrate session from localStorage on mount
+  // ── Konversi profile Supabase ke format yang dipakai di seluruh app ──
+  const buildUser = (profile) => {
+    if (!profile) return null;
+    return {
+      id:    profile.id,
+      name:  profile.full_name,
+      email: profile.email,
+      phone: profile.phone,
+      role:  profile.role,
+      points: profile.points ?? 0,
+      tier_id: profile.tier_id,
+      tier:  profile.tiers ?? null,
+    };
+  };
+
+  // ── Load session saat app pertama kali mount ──
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SESSION_KEY);
-      if (stored) {
-        setUser(JSON.parse(stored));
+    let isMounted = true;
+
+    const loadSession = async () => {
+      const sessionData = await getActiveSession();
+      if (isMounted) {
+        setUser(sessionData ? buildUser(sessionData.profile) : null);
+        setLoading(false);
       }
-    } catch {
-      localStorage.removeItem(SESSION_KEY);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadSession();
+
+    // ── Listen perubahan auth state (login, logout, token refresh) ──
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!isMounted) return;
+
+        if (event === 'SIGNED_OUT' || !session) {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          // Ambil profile terbaru dari DB
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*, tiers(id, name, min_points, discount_percentage)')
+            .eq('id', session.user.id)
+            .single();
+
+          if (!error && profile && isMounted) {
+            setUser(buildUser(profile));
+          }
+          if (isMounted) setLoading(false);
+        }
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   /**
-   * Save user session. userData should include: { id, name, email, role }
+   * Simpan user ke context setelah login berhasil.
+   * Dipanggil dari halaman Login setelah mendapat profile dari Supabase.
    */
-  const login = useCallback((userData) => {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(userData));
-    // Keep legacy key for MainLayouts guard compatibility
-    if (userData.role === 'admin') {
-      localStorage.setItem('isLoggedIn', 'true');
-    }
-    setUser(userData);
+  const login = useCallback((profile) => {
+    setUser(buildUser(profile));
   }, []);
 
   /**
-   * Clear session completely.
+   * Logout: sign out dari Supabase + clear context.
    */
-  const logout = useCallback(() => {
-    localStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem('isLoggedIn');
-    // Also clear old individual keys for safety
-    ['dentacare_member_token', 'dentacare_member_name',
+  const logout = useCallback(async () => {
+    await signOut();
+    setUser(null);
+    // Hapus juga key legacy localStorage jika masih ada
+    ['dentacare_session', 'isLoggedIn',
+     'dentacare_member_token', 'dentacare_member_name',
      'dentacare_member_email', 'dentacare_member_role'].forEach((k) =>
       localStorage.removeItem(k)
     );
-    setUser(null);
   }, []);
 
   /**
-   * Update the in-memory and stored user fields (e.g. after profile edit).
+   * Update user di context (misal setelah edit profil).
    */
-  const updateUser = useCallback((updatedData) => {
-    setUser((prev) => {
-      const next = { ...prev, ...updatedData };
-      localStorage.setItem(SESSION_KEY, JSON.stringify(next));
-      return next;
-    });
+  const updateUser = useCallback((updatedFields) => {
+    setUser((prev) => prev ? { ...prev, ...updatedFields } : prev);
   }, []);
 
   return (

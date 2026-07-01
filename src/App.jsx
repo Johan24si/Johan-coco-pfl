@@ -18,14 +18,12 @@ const Orders = React.lazy(() => import("./pages/Orders"));
 const Customers = React.lazy(() => import("./pages/Customers"));
 const Details = React.lazy(() => import("./pages/Details"));
 const Service = React.lazy(() => import("./pages/Service"));
+const Users = React.lazy(() => import("./pages/Users"));
 
 // ── Auth Pages ──
-const AdminLogin = React.lazy(() => import("./pages/auth/admin/Login"));
-const AdminRegister = React.lazy(() => import("./pages/auth/admin/Register"));
-const AdminForgot = React.lazy(() => import("./pages/auth/admin/Forgot"));
-const GuestLogin = React.lazy(() => import("./pages/auth/guest/Login"));
-const GuestRegister = React.lazy(() => import("./pages/auth/guest/Register"));
-const GuestForgot = React.lazy(() => import("./pages/auth/guest/Forgot"));
+const Login = React.lazy(() => import("./pages/auth/Login"));
+const Register = React.lazy(() => import("./pages/auth/Register"));
+const Forgot = React.lazy(() => import("./pages/auth/Forgot"));
 
 // ── Guest / Public Pages ──
 const GuestPage = React.lazy(() => import("./pages/GuestPage"));
@@ -65,13 +63,9 @@ export default function App() {
 
             {/* ── Auth Routes ── */}
             <Route element={<AuthLayout />}>
-              <Route path="/login" element={<AdminLogin />} />
-              <Route path="/register" element={<AdminRegister />} />
-              <Route path="/forgot" element={<AdminForgot />} />
-              
-              <Route path="/guest/login" element={<GuestLogin />} />
-              <Route path="/guest/register" element={<GuestRegister />} />
-              <Route path="/guest/forgot" element={<GuestForgot />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot" element={<Forgot />} />
             </Route>
 
             {/* ── Member Routes ── */}
@@ -96,6 +90,7 @@ export default function App() {
               <Route path="/customers" element={<Customers />} />
               <Route path="/customers/:id" element={<Details />} />
               <Route path="/service" element={<Service />} />
+              <Route path="/users" element={<Users />} />
             </Route>
 
             {/* ── Error Routes ── */}

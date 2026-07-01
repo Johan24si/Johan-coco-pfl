@@ -10,7 +10,7 @@ export default function MainLayouts() {
   // Wait for session rehydration
   if (loading) return null;
 
-  // Redirect to login if not authenticated or not admin
+  // Redirect ke login jika bukan admin
   if (!user || user.role !== 'admin') {
     return <Navigate to="/login" replace />;
   }
